@@ -1,24 +1,67 @@
-class HTMLElement:
-    def __init__(self, tag, content="", **attributes):
-        self.tag = tag
-        self.content = content
-        self.attributes = {k.rstrip('_'): v for k, v in attributes.items() if v is not None}
-        self.children = []
+from typing import Any, Dict, List, Optional, Union
 
-    def add_child(self, child):
-        """Add child elements, wrapping strings in span tags."""
+class HTMLElement:
+    """
+    A class representing an HTML element.
+
+    Attributes:
+        tag (str): The HTML tag name (e.g., "div", "p", "a").
+        content (str): The inner text content of the element.
+        attributes (Dict[str, str]): Dictionary of HTML attributes and their values.
+        children (List[HTMLElement]): List of child elements.
+    """
+
+    def __init__(self, tag: str, content: str = "", **attributes: Optional[str]) -> None:
+        """
+        Initializes an HTMLElement with a tag, optional content, and attributes.
+
+        Args:
+            tag (str): The HTML tag name (e.g., "div", "p", "a").
+            content (str, optional): The text content of the element. Default is an empty string.
+            **attributes (Optional[str]): Additional HTML attributes (e.g., class="container", id="main").
+        """
+        self.tag: str = tag
+        self.content: str = content
+        self.attributes: Dict[str, str] = {k.rstrip('_'): v for k, v in attributes.items() if v is not None}
+        self.children: List[HTMLElement] = []
+
+    def add_child(self, child: Union["HTMLElement", str]) -> None:
+        """
+        Adds a child element to this HTMLElement.
+
+        - If `child` is a string, it is wrapped in a `<span>` tag.
+        - If `child` is an `HTMLElement`, it is added as a direct child.
+
+        Args:
+            child (Union[HTMLElement, str]): The child element or text to be added.
+        """
         self.children.append(child if isinstance(child, HTMLElement) else HTMLElement("span", str(child)))
 
-    def set_attribute(self, key, value):
-        """Set an attribute if the value is not None."""
+    def set_attribute(self, key: str, value: Optional[str]) -> None:
+        """
+        Sets an attribute for the HTML element.
+
+        Args:
+            key (str): The name of the attribute (e.g., "class", "id").
+            value (Optional[str]): The value of the attribute. If None, the attribute is not set.
+        """
         if value is not None:
             self.attributes[key.rstrip('_')] = value
 
-    def render(self):
-        """Render HTML as a string."""
-        attrs = " ".join(f'{key}="{value}"' for key, value in self.attributes.items())
-        children_html = "".join(child.render() for child in self.children)
+    def render(self) -> str:
+        """
+        Generates and returns the HTML string representation of the element.
+
+        Returns:
+            str: The complete HTML representation of the element and its children.
+        """
+        attrs: str = " ".join(f'{key}="{value}"' for key, value in self.attributes.items())
+        children_html: str = "".join(child.render() for child in self.children)
         return f"<{self.tag} {attrs}>{self.content}{children_html}</{self.tag}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Returns:
+            str: The string representation of the HTMLElement (calls `render()`).
+        """
         return self.render()
