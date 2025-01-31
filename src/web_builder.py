@@ -2,25 +2,23 @@ class HTMLElement:
     def __init__(self, tag, content="", **attributes):
         self.tag = tag
         self.content = content
-        # Convert 'class_' to 'class' for valid HTML attributes
-        self.attributes = {k.rstrip('_'): v for k, v in attributes.items()}
+        self.attributes = {k.rstrip('_'): v for k, v in attributes.items() if v is not None}
         self.children = []
 
     def add_child(self, child):
-        if isinstance(child, HTMLElement):
-            self.children.append(child)
-        else:
-            self.children.append(HTMLElement("span", str(child)))
+        """Add child elements, wrapping strings in span tags."""
+        self.children.append(child if isinstance(child, HTMLElement) else HTMLElement("span", str(child)))
 
     def set_attribute(self, key, value):
-        self.attributes[key] = value
+        """Set an attribute if the value is not None."""
+        if value is not None:
+            self.attributes[key.rstrip('_')] = value
 
     def render(self):
+        """Render HTML as a string."""
         attrs = " ".join(f'{key}="{value}"' for key, value in self.attributes.items())
-        if attrs:
-            attrs = " " + attrs
         children_html = "".join(child.render() for child in self.children)
-        return f"<{self.tag}{attrs}>{self.content}{children_html}</{self.tag}>"
+        return f"<{self.tag} {attrs}>{self.content}{children_html}</{self.tag}>"
 
     def __str__(self):
         return self.render()
