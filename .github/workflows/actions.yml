@@ -8,7 +8,7 @@ on:
 
 jobs:
   send_email:
-    runs-on: windows-latest  # Use Windows instead of Ubuntu
+    runs-on: windows-latest  # ⚠️ Change from "ubuntu-latest" to "windows-latest"
 
     steps:
       - name: Checkout repository
