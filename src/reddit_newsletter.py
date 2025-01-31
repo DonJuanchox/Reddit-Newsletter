@@ -1,6 +1,5 @@
 import os
 import logging
-import requests
 import validators
 from dotenv import load_dotenv
 from requests.auth import HTTPBasicAuth
