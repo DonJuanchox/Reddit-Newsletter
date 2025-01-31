@@ -8,7 +8,7 @@ from praw.reddit import Reddit
 from praw.models import Subreddit
 
 # Import modules assuming they are available via PYTHONPATH
-from Email_access import Email_Access
+from automatic_email import Email_Access
 from reddit_post_scraper import RedditPost
 from html_element import HTMLElement
 
