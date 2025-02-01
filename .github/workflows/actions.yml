@@ -3,12 +3,12 @@ name: Scheduled Reddit Newsletter Email
 on:
   schedule:
     - cron: "0 7 * * *"  # Runs at 8 AM CET (7 AM UTC)
-    - cron: "0 20 * * *" # Runs at 9 PM CET (8 PM UTC)
-  workflow_dispatch: # Allows manual triggering
+    - cron: "0 20 * * *"  # Runs at 9 PM CET (8 PM UTC)
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   send_email:
-    runs-on: windows-latest  # ⚠️ Change from "ubuntu-latest" to "windows-latest"
+    runs-on: windows-latest  # ⚠️ Runs on Windows
 
     steps:
       - name: Checkout repository
@@ -26,13 +26,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create .env file
+      - name: Parse API_KEYS and create .env file
+        shell: pwsh  # Use PowerShell for JSON parsing in Windows
         run: |
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
-          echo "REDDIT_USERNAME=${{ secrets.REDDIT_USERNAME }}" >> .env
-          echo "REDDIT_PASSWORD=${{ secrets.REDDIT_PASSWORD }}" >> .env
-          echo "USER_AGENT=${{ secrets.USER_AGENT }}" >> .env
+          $api_keys = ConvertFrom-Json '${{ secrets.API_KEYS }}'
+          Set-Content -Path .env -Value "CLIENT_ID=$($api_keys.CLIENT_ID)"
+          Add-Content -Path .env -Value "CLIENT_SECRET=$($api_keys.CLIENT_SECRET)"
+          Add-Content -Path .env -Value "REDDIT_USERNAME=$($api_keys.REDDIT_USERNAME)"
+          Add-Content -Path .env -Value "REDDIT_PASSWORD=$($api_keys.REDDIT_PASSWORD)"
+          Add-Content -Path .env -Value "USER_AGENT=$($api_keys.USER_AGENT)"
+          Add-Content -Path .env -Value "EMAIL_SENDER=$($api_keys.EMAIL_SENDER)"
+          Add-Content -Path .env -Value "EMAIL_PASSWORD=$($api_keys.EMAIL_PASSWORD)"
+          Add-Content -Path .env -Value "EMAIL_RECEIVER=$($api_keys.EMAIL_RECEIVER)"
 
       - name: Run Reddit newsletter script
         run: python reddit_newsletter.py
