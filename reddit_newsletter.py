@@ -36,11 +36,11 @@ def initialize_praw() -> Reddit:
         exit(1)
 
     return praw.Reddit(
-        client_id=env_vars["CLIENT_ID"],
-        client_secret=env_vars["CLIENT_SECRET"],
-        user_agent=env_vars["USER_AGENT"],
-        username=env_vars["REDDIT_USERNAME"],
-        password=env_vars["REDDIT_PASSWORD"]
+        CLIENT_ID=env_vars["CLIENT_ID"],
+        CLIENT_SECRET=env_vars["CLIENT_SECRET"],
+        USER_AGENT=env_vars["USER_AGENT"],
+        REDDIT_USERNAME=env_vars["REDDIT_USERNAME"],
+        REDDIT_PASSWORD=env_vars["REDDIT_PASSWORD"]
     )
 
 def fetch_top_posts(subreddit_name: str, limit: int = 30, min_score: int = 50) -> list[RedditPost]:
