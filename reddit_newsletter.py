@@ -141,13 +141,13 @@ logging.basicConfig(
 )
 
 outlook = Email_Access(
-    imap_server="imap.gmail.com",   # ✅ IMAP server for Gmail
-    smtp_server="smtp.gmail.com",   # ✅ SMTP server for Gmail
-    email_user="fre792@gmail.com",  # ✅ Your Gmail email
-    email_pass="axgn hgay lhzi gepy"  # ✅ Your Gmail App Password (not main password)
+    imap_server="imap.gmail.com",   #  IMAP server for Gmail
+    smtp_server="smtp.gmail.com",   #  SMTP server for Gmail
+    email_user="fre792@gmail.com",  #  Your Gmail email
+    email_pass="axgn hgay lhzi gepy"  #  Your Gmail App Password (not main password)
 )
 
-print("✅ Email Sent Successfully!")
+print("Email Sent Successfully!")
 
 subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
 all_posts: list[RedditPost] = [post for sub in subreddits for post in fetch_top_posts(sub, limit=10, min_score=20)]
