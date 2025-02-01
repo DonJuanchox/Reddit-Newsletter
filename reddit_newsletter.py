@@ -25,7 +25,7 @@ def initialize_praw() -> Reddit:
     Raises:
         SystemExit: If any required environment variable is missing.
     """
-    load_dotenv()
+    # load_dotenv()
 
     required_vars = ["CLIENT_ID", "CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD", "USER_AGENT"]
     env_vars: dict[str, str | None] = {var: os.getenv(var) for var in required_vars}
