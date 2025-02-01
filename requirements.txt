@@ -1,4 +1,4 @@
-AutomaticEmail @ git+https://github.com/DonJuanchox/Automatic-Email.git
+AutomaticEmail @ git+https://github.com/DonJuanchox/Automatic-Email.git@main
 certifi==2025.1.31
 charset-normalizer==3.4.1
 idna==3.10
