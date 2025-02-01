@@ -140,7 +140,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-outlook: Email_Access = Email_Access(
+outlook = Email_Access(
     imap_server="imap.gmail.com",   # ✅ IMAP server for Gmail
     smtp_server="smtp.gmail.com",   # ✅ SMTP server for Gmail
     email_user="fre792@gmail.com",  # ✅ Your Gmail email
