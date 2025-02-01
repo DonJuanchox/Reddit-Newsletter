@@ -142,13 +142,13 @@ logging.basicConfig(
 )
 load_dotenv()
 
-required_vars = ["E_SENDER", "E_PSWD"]
-env_vars: dict[str, str | None] = {var: os.getenv(var) for var in required_vars}
+e_user = os.getenv('E_SENDER')
+e_pswd = os.getenv('E_PSWD')
 outlook = Email_Access(
     imap_server="imap.gmail.com",   #  IMAP server for Gmail
     smtp_server="smtp.gmail.com",   #  SMTP server for Gmail
-    email_user=env_vars["E_SENDER"],  #  Your Gmail email
-    email_pass=env_vars["E_PSWD"]  #  Your Gmail App Password (not main password)
+    email_user=f'{e_user}',  #  Your Gmail email
+    email_pass=f'{e_pswd}'  #  Your Gmail App Password (not main password)
 )
 
 print("Email Sent Successfully!")
