@@ -1,3 +1,21 @@
+"""
+This module automates the process of fetching top Reddit posts from specified subreddits, formatting the content into an HTML email, and sending it via email.
+
+The module performs the following tasks:
+- Loads authentication credentials from environment variables.
+- Initializes a PRAW Reddit instance using a decorator function.
+- Fetches top posts from specified subreddits based on score and time filters.
+- Extracts and cleans post content for inclusion in an email.
+- Dynamically generates structured HTML content from the fetched posts.
+- Sends the formatted email using an email client.
+
+Example Usage:
+    # The script fetches posts, formats them, and sends an email automatically.
+    python script.py
+
+This module is useful for automating the retrieval of Reddit content and distributing it via email for tracking trends or news aggregation.
+"""
+
 import os
 import logging
 import validators
@@ -12,61 +30,50 @@ from automatic_email import Email_Access
 from reddit_post_scraper import RedditPost
 from html_element import HTMLElement
 
-def initialize_praw() -> Reddit:
+# Load environment variables once
+load_dotenv()
+required_vars = ["CLIENT_ID", "CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD", "USER_AGENT", "E_SENDER", "E_PSWD"]
+env_vars: dict[str, str | None] = {var: os.getenv(var) for var in required_vars}
+
+missing_vars: list[str] = [key for key, value in env_vars.items() if not value]
+if missing_vars:
+    logging.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+    exit(1)
+
+def initialize_praw(func):
     """
-    Load environment variables and initialize PRAW Reddit instance.
-
-    This function loads Reddit API credentials from environment variables and initializes
-    a PRAW (Python Reddit API Wrapper) instance for interacting with Reddit.
-
-    Returns:
-        Reddit: A PRAW Reddit instance for API interactions.
-
-    Raises:
-        SystemExit: If any required environment variable is missing.
+    Decorator to initialize PRAW Reddit instance before executing a function.
+    Loads authentication details from environment variables and passes the Reddit instance
+    and environment variables to the decorated function.
     """
-    load_dotenv()
+    def wrapper(*args, **kwargs):
+        praw_instance = praw.Reddit(
+            client_id=env_vars["CLIENT_ID"],
+            client_secret=env_vars["CLIENT_SECRET"],
+            user_agent=env_vars["USER_AGENT"],
+            username=env_vars["REDDIT_USERNAME"],
+            password=env_vars["REDDIT_PASSWORD"]
+        )
+        return func(praw_instance, env_vars, *args, **kwargs)
+    return wrapper
 
-    required_vars = ["CLIENT_ID", "CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD", "USER_AGENT"]
-    env_vars: dict[str, str | None] = {var: os.getenv(var) for var in required_vars}
-
-    missing_vars: list[str] = [key for key, value in env_vars.items() if not value]
-    if missing_vars:
-        logging.error(f"Missing required environment variables: {', '.join(missing_vars)}")
-        exit(1)
-
-    return praw.Reddit(
-        client_id=env_vars["CLIENT_ID"],
-        client_secret=env_vars["CLIENT_SECRET"],
-        user_agent=env_vars["USER_AGENT"],
-        username=env_vars["REDDIT_USERNAME"],
-        password=env_vars["REDDIT_PASSWORD"]
-    )
-
-
-def fetch_top_posts(subreddit_name: str, limit: int = 30, min_score: int = 50) -> list[RedditPost]:
+@initialize_praw
+def fetch_top_posts(reddit: Reddit, env_vars: dict, subreddit_name: str, limit: int = 30, min_score: int = 50) -> list[RedditPost]:
     """
     Fetch and return top posts from a subreddit.
-
-    This function retrieves the top daily posts from a given subreddit, filtering
-    out posts that do not meet the minimum upvote score.
-
+    
     Args:
-        subreddit_name (str): The name of the subreddit to fetch posts from.
-        limit (int, optional): Maximum number of posts to retrieve. Default is 30.
-        min_score (int, optional): Minimum score required for posts to be included. Default is 50.
+        reddit (Reddit): An initialized Reddit instance.
+        env_vars (dict): Dictionary containing environment variables.
+        subreddit_name (str): The subreddit from which to fetch posts.
+        limit (int, optional): The maximum number of posts to retrieve. Defaults to 30.
+        min_score (int, optional): The minimum score required for a post to be included. Defaults to 50.
 
     Returns:
         list[RedditPost]: A list of RedditPost objects containing post details.
-
-    Logs:
-        - INFO: Number of posts fetched.
-        - ERROR: If an exception occurs while fetching posts.
     """
     try:
-        reddit: Reddit = initialize_praw()
         subreddit: Subreddit = reddit.subreddit(subreddit_name)
-
         logging.info(f"Fetching top {limit} posts from r/{subreddit_name}...")
         posts: list[RedditPost] = [
             RedditPost(sub.title, sub.score, sub.url)
@@ -77,7 +84,6 @@ def fetch_top_posts(subreddit_name: str, limit: int = 30, min_score: int = 50) -
             post.fetch_post()
         logging.info(f"Fetched {len(posts)} posts from r/{subreddit_name}.")
         return posts
-
     except Exception as e:
         logging.exception(f"Error fetching posts from r/{subreddit_name}: {e}")
         return []
@@ -85,45 +91,32 @@ def fetch_top_posts(subreddit_name: str, limit: int = 30, min_score: int = 50) -
 def create_email_content(posts: list[RedditPost]) -> str:
     """
     Generate formatted HTML content for the email.
-
-    This function creates an HTML email containing Reddit posts, formatting
-    them with proper spacing and styles.
-
+    
     Args:
         posts (list[RedditPost]): A list of RedditPost objects.
-
+    
     Returns:
         str: A formatted HTML string ready to be sent via email.
-
-    Notes:
-        - Skips posts that contain unwanted phrases like "Skipped image content."
-        - Converts URLs in the post body into clickable links.
     """
     all_content: str = ""
     unwanted_phrases: list[str] = ["Skipped image content.", "https://www.reddit.com/gallery"]
-
     for post in posts:
         div: HTMLElement = HTMLElement("div", class_="container")
         title: HTMLElement = HTMLElement(
             "h1", HTMLElement("a", post.title, href=post.url, style="color: black !important; text-decoration: none;")
         )
         div.add_child(title)
-
         content: str = post.read_post()
         if any(phrase in content for phrase in unwanted_phrases):
             continue
-
         content_element: HTMLElement = HTMLElement(
             "p",
             HTMLElement("a", content, href=content, style="color: #FF4500 !important; text-decoration: none; font-weight: bold;")
         ) if validators.url(content) else HTMLElement("p", content)
-        
         div.add_child(content_element)
         div.add_child(HTMLElement("br"))
         div.add_child(HTMLElement("br"))
-
         all_content += str(div)
-
     return f"""
     <style>
         .container {{ font-family: Arial, sans-serif; margin-bottom: 20px; }}
@@ -140,29 +133,27 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-load_dotenv()
-
-e_user = os.getenv('E_SENDER')
-e_pswd = os.getenv('E_PSWD')
-outlook = Email_Access(
-    imap_server="imap.gmail.com",   #  IMAP server for Gmail
-    smtp_server="smtp.gmail.com",   #  SMTP server for Gmail
-    email_user=f'{e_user}',  #  Your Gmail email
-    email_pass=f'{e_pswd}'  #  Your Gmail App Password (not main password)
-)
-
-print("Email Sent Successfully!")
 
 subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
-all_posts: list[RedditPost] = [post for sub in subreddits for post in fetch_top_posts(sub, limit=10, min_score=20)]
+all_posts: list[RedditPost] = [
+    post for sub in subreddits 
+    for post in fetch_top_posts(subreddit_name=sub, limit=10, min_score=20)
+]
 email_content: str = create_email_content(all_posts)
+
+outlook = Email_Access(
+    imap_server="imap.gmail.com",
+    smtp_server="smtp.gmail.com",
+    email_user=env_vars["E_SENDER"],
+    email_pass=env_vars["E_PSWD"]
+)
 
 try:
     logging.info("Sending email...")
     outlook.send_email(
         'juannrodriguezpeinado@hotmail.com',
         'Reddit Top Posts | Juan Rodriguez',
-        email_content,  
+        email_content,
         html_body=True
     )
     logging.info("Email sent successfully!")

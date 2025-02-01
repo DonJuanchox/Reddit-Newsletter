@@ -1,3 +1,20 @@
+"""
+This module provides a `RedditPost` class for retrieving and processing Reddit post content.
+
+The class is designed to:
+- Store and represent key details of a Reddit post, such as its title, score, and URL.
+- Fetch the post's content from the given URL, while handling potential request failures.
+- Identify and handle image URLs separately to avoid fetching unnecessary content.
+- Provide a readable string representation of a Reddit post.
+- Clean and return the post content in a structured format.
+
+Example Usage:
+    >>> post = RedditPost("Example Post", 123, "https://example.com")
+    >>> post.fetch_post()
+    >>> print(post.read_post())
+
+This module is particularly useful for applications that need to extract and process Reddit post content dynamically.
+"""
 import requests
 import re
 import mimetypes

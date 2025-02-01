@@ -1,3 +1,20 @@
+"""
+This module defines the `HTMLElement` class, which provides a structured way to create and manage HTML elements dynamically in Python.
+
+The class allows:
+- Representation of an HTML element with tag, attributes, content, and child elements.
+- Adding child elements, either as `HTMLElement` objects or plain text wrapped in `<span>` tags.
+- Setting and modifying HTML attributes dynamically.
+- Rendering the complete HTML structure as a string.
+
+Example Usage:
+    >>> div = HTMLElement("div", "Hello, world!", class_="container")
+    >>> div.add_child(HTMLElement("p", "This is a paragraph."))
+    >>> print(div)
+    '<div class="container">Hello, world!<p>This is a paragraph.</p></div>'
+
+This module is useful for dynamically generating HTML structures within Python applications.
+"""
 from typing import Any, Dict, List, Optional, Union
 
 class HTMLElement:

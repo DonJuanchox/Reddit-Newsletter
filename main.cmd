@@ -1,2 +1,1 @@
-set PYTHONPATH=C:\Users\juann\OneDrive\Documentos\GitHub\OOP\Automatic Email\src
-python reddit_newsletter.py
+python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt && python reddit_newsletter.py && deactivate && rmdir /s /q venv
