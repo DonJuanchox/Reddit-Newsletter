@@ -137,7 +137,7 @@ logging.basicConfig(
 subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
 all_posts: list[RedditPost] = [
     post for sub in subreddits 
-    for post in fetch_top_posts(subreddit_name=sub, limit=10, min_score=20)
+    for post in fetch_top_posts(subreddit_name=sub, limit=50, min_score=20)
 ]
 email_content: str = create_email_content(all_posts)
 
