@@ -25,15 +25,16 @@ import praw
 from praw.reddit import Reddit
 from praw.models import Subreddit
 
-# Import modules assuming they are available via PYTHONPATH
 from automatic_email import Email_Access
 from reddit_post_scraper import RedditPost
 from html_element import HTMLElement
 
 # Load environment variables once
 load_dotenv()
-required_vars = ["CLIENT_ID", "CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD", "USER_AGENT", "E_SENDER", "E_PSWD"]
+required_vars = ["CLIENT_ID", "CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD", "USER_AGENT",
+                 "E_SENDER", "E_PSWD", "SMTP_USERNAME", "SMTP_PASSWORD", "SMTP_SERVER", "SMTP_PORT"]
 env_vars: dict[str, str | None] = {var: os.getenv(var) for var in required_vars}
+print(env_vars)
 
 missing_vars: list[str] = [key for key, value in env_vars.items() if not value]
 if missing_vars:
@@ -58,7 +59,7 @@ def initialize_praw(func):
     return wrapper
 
 @initialize_praw
-def fetch_top_posts(reddit: Reddit, env_vars: dict, subreddit_name: str, limit: int = 30, min_score: int = 50) -> list[RedditPost]:
+def fetch_top_posts(reddit: Reddit, env_vars: dict, subreddit_name: str, limit: int = 10, min_score: int = 5) -> list[RedditPost]:
     """
     Fetch and return top posts from a subreddit.
     
@@ -137,25 +138,23 @@ logging.basicConfig(
 subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
 all_posts: list[RedditPost] = [
     post for sub in subreddits 
-    for post in fetch_top_posts(subreddit_name=sub, limit=50, min_score=20)
+    for post in fetch_top_posts(subreddit_name=sub, limit=50, min_score=10)
 ]
 email_content: str = create_email_content(all_posts)
 
-outlook = Email_Access(
-    imap_server="imap.gmail.com",
-    smtp_server="smtp.gmail.com",
-    email_user=env_vars["E_SENDER"],
-    email_pass=env_vars["E_PSWD"]
-)
+# Get credentials from environment variables (or GitHub Secrets)
+# SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")  # Change based on provider
+# SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+# SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+# SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-try:
-    logging.info("Sending email...")
-    outlook.send_email(
-        '--',
-        'Reddit Top Posts | Juan Rodriguez',
-        email_content,
-        html_body=True
-    )
-    logging.info("Email sent successfully!")
-except Exception as e:
-    logging.exception(f"Failed to send email: {e}")
+email_client = Email_Access(env_vars['SMTP_SERVER'], env_vars['SMTP_PORT'], env_vars['SMTP_USERNAME'], env_vars['SMTP_PASSWORD'])
+
+# Send email using an Outlook account
+email_client.send_email(
+    from_address=env_vars['SMTP_USERNAME'],
+    to_address="---add---",
+    subject="RDDT Top Posts",
+    body=email_content,
+    html_body=True
+)
