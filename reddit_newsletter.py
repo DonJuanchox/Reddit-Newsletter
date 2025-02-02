@@ -151,7 +151,7 @@ outlook = Email_Access(
 try:
     logging.info("Sending email...")
     outlook.send_email(
-        'juannrodriguezpeinado@hotmail.com',
+        '--',
         'Reddit Top Posts | Juan Rodriguez',
         email_content,
         html_body=True
