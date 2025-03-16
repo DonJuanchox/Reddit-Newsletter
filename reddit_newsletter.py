@@ -1,3 +1,4 @@
+# TODO> fetch other posts not only top posts
 """
 This module automates the process of fetching top Reddit posts from specified subreddits, formatting the content into an HTML email, and sending it via email.
 
@@ -153,7 +154,7 @@ email_client = Email_Access(env_vars['SMTP_SERVER'], env_vars['SMTP_PORT'], env_
 # Send email using an Outlook account
 email_client.send_email(
     from_address=env_vars['SMTP_USERNAME'],
-    to_address="---add---",
+    to_address="juannrodriguezpeinado@hotmail.com",
     subject="RDDT Top Posts",
     body=email_content,
     html_body=True
