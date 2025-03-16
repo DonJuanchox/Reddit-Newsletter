@@ -136,7 +136,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-subreddits: list[str] = ['stocks']  #  'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting'
+subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
 all_posts: list[RedditPost] = [
     post for sub in subreddits 
     for post in fetch_top_posts(subreddit_name=sub, limit=50, min_score=10)
