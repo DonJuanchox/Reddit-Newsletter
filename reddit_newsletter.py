@@ -136,7 +136,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-subreddits: list[str] = ['stocks', 'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting']
+subreddits: list[str] = ['stocks']  #  'investing', 'StockMarket', 'wallstreetbets', 'ETFs_Europe', 'ValueInvesting'
 all_posts: list[RedditPost] = [
     post for sub in subreddits 
     for post in fetch_top_posts(subreddit_name=sub, limit=50, min_score=10)
@@ -144,7 +144,7 @@ all_posts: list[RedditPost] = [
 email_content: str = create_email_content(all_posts)
 
 # Get credentials from environment variables (or GitHub Secrets)
-# SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")  # Change based on provider
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")  # Change based on provider
 # SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 # SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 # SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
